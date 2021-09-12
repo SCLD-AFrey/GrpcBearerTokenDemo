@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+option csharp_namespace = "FunctionServerProto";
+
+package FunctionServerProto;
+
+service FunctionsService{
+  rpc GetSumRpc (BasicRequest) returns (BasicReply);
+  rpc GetUserInfoRpc (UserRequest) returns (UserInfoReply);
+  rpc ReturnUtcDate (google.protobuf.Empty) returns (BasicReply);
+  rpc GetUserAllUsers (google.protobuf.Empty) returns (UserRepoReply);
+}
+
+message BasicRequest{
+  string content = 1;
+}
+message BasicReply{
+  string content = 1;
+}
+message UserRequest{
+  string username = 1;
+}
+message UserInfoReply{
+  string username = 1;
+  repeated UserRole roles = 2;
+  string emailaddress = 3;
+  string dob = 4;
+}
+message UserRole{
+  string name = 1;
+}
+message UserRepoReply{
+  repeated User users = 2;
+}
+message User{
+  string Username = 1;
+}
+
+
+
