@@ -27,10 +27,13 @@ namespace ClientRequester
             Console.WriteLine();
             Console.WriteLine("Press a key:");
             Console.WriteLine($"1: Authenticate as...");
-            Console.WriteLine($"2: Get Current User Info [ADMIN]");
-            Console.WriteLine($"3: Get All Users         [POWERUSER]");
+            Console.WriteLine($"2: Get All Users         [POWERUSER]");
+            Console.WriteLine($"3: Get Current User Info [ADMIN]");
             Console.WriteLine($"4: Return UTC Date       [PRIVATE_USER]");
+            Console.WriteLine($"5: Get Current Timestamp [ALL AUTH USERS]");
+            Console.WriteLine($"6: View Bearer Token");
             Console.WriteLine($"Q: Quit");
+            Console.WriteLine("-------------------");
 
             do
             {
@@ -52,16 +55,20 @@ namespace ClientRequester
                         DoAuthentication(_username);
                         break;
                     case ConsoleKey.D2:
-                        GetUserInfo(client, _username);
-                        break;
-                    case ConsoleKey.D3:
                         GetAllUsers(client);
                         break;
+                    case ConsoleKey.D3:
+                        GetUserInfo(client, _username);
+                        break;
                     case ConsoleKey.D4:
-
                         GetUtcDate(client);
-
-                        
+                        break;
+                    case ConsoleKey.D5:
+                        GetCurrentTimestamp(client);
+                        break;
+                    case ConsoleKey.D6:
+                        Console.WriteLine($"Bearer Token: {_bearerToken}");
+                        Console.WriteLine("-------------------");
                         break;
                     case ConsoleKey.Q:
                         Console.WriteLine($"...Shutdown");
@@ -74,16 +81,23 @@ namespace ClientRequester
                 
                 
 
-                Console.WriteLine("-------------------");
 
 
             } while (!key.Equals(ConsoleKey.Q));
+        }
+
+        private async static void GetCurrentTimestamp(FunctionsService.FunctionsServiceClient p_client)
+        {
+            var response = p_client.ReturnCurrentTimestamp(new Empty(), _clientHeader);
+            Console.WriteLine($"The current server time is  {response.ToDateTime().ToString("HH:mm:ss tt zz")}");
+            Console.WriteLine("-------------------");
         }
 
         private async static void GetUtcDate(FunctionsService.FunctionsServiceClient p_client)
         {
             var response = await p_client.ReturnUtcDateAsync(new Empty(), _clientHeader);
             Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content).ToString("mm/dd/yyyy")}");
+            Console.WriteLine("-------------------");
         }
 
         private async static void GetAllUsers(FunctionsService.FunctionsServiceClient p_client)
@@ -93,8 +107,12 @@ namespace ClientRequester
             foreach (var user in response.Users)
             {
                 cnt++;
-                Console.WriteLine($"{cnt}. {user.Username}");
+                Console.Write($"{cnt}. {user.Username}");
+                foreach (var role in user.Roles)
+                    Console.Write($" -{role.Name}");
+                Console.Write(Environment.NewLine);
             }
+            Console.WriteLine("-------------------");
         }
 
         private async static void GetUserInfo(FunctionsService.FunctionsServiceClient p_client, string p_username)
@@ -109,16 +127,28 @@ namespace ClientRequester
                 Console.WriteLine($"Role(s): {role.Name}");
             Console.WriteLine($"Email Address: {response.Dob}");
             Console.WriteLine($"Birthdate: {response.Dob}");
+            Console.WriteLine("-------------------");
         }
 
         private async static void DoAuthentication(string p_username)
         {
+            Console.WriteLine($"Authenticating as {p_username}...");
+            _bearerToken = null;
             _bearerToken = await AuthenticateUser(_username);
+            if (_bearerToken != null)
+            {
+                Console.WriteLine($"Successfully authenticated. ");
+                Console.WriteLine($" -Token ({_bearerToken.Length} chars): {_bearerToken.Substring(0,25)}...");
+            }
+            else
+            {
+                Console.WriteLine("Authentication Failed.");
+            }
+            Console.WriteLine("-------------------");
         }
 
         private static async Task<string> AuthenticateUser(string p_username)
         {
-            Console.WriteLine($"Authenticating as {p_username}...");
             using var httpClient = new HttpClient();
             using var request = new HttpRequestMessage
             {
@@ -130,7 +160,6 @@ namespace ClientRequester
             tokenResponse.EnsureSuccessStatusCode();
 
             var token = await tokenResponse.Content.ReadAsStringAsync();
-            Console.WriteLine("Successfully authenticated.");
 
             return token;
         }

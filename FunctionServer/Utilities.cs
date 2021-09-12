@@ -12,12 +12,7 @@ namespace FunctionServer
     public class Utilities
     {
         public static string GenerateJwtToken(string p_username, SecurityKey p_securityKey, JwtSecurityTokenHandler p_jwtTokenHandler)
-        {
-            if (string.IsNullOrEmpty(p_username))
-            {
-                throw new InvalidOperationException("Name is not specified.");
-            }
-            
+        {            
             var claims = new List<Claim>();
             var roles = new List<string>();
             UserRepo.ClientUser user;
@@ -34,11 +29,22 @@ namespace FunctionServer
                 claims.Add(new Claim(ClaimTypes.DateOfBirth, user.DOB.ToString()));
                 claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
                 credentials = new SigningCredentials(p_securityKey, SecurityAlgorithms.HmacSha256);
-                foreach (var role in user.Roles)
+
+
+                if (user.Roles.Length == 0)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
-                    roles.Add(role.ToString());
+                    claims.Add(new Claim(ClaimTypes.Role, UserRepo.enRoles.PUBLIC_USER.ToString()));
                 }
+                else
+                {
+                    foreach (var role in user.Roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+                        roles.Add(role.ToString());
+                    }
+                }
+                
+                
                 Console.WriteLine($"{p_username} authenticated as {string.Join(", ", user.Roles)}");
                 var token = new JwtSecurityToken(
                     "ExampleServer", 

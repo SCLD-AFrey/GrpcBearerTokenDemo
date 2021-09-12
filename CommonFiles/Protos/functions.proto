@@ -1,15 +1,16 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 option csharp_namespace = "FunctionServerProto";
 
 package FunctionServerProto;
 
 service FunctionsService{
-  rpc GetSumRpc (BasicRequest) returns (BasicReply);
   rpc GetUserInfoRpc (UserRequest) returns (UserInfoReply);
   rpc ReturnUtcDate (google.protobuf.Empty) returns (BasicReply);
   rpc GetUserAllUsers (google.protobuf.Empty) returns (UserRepoReply);
+  rpc ReturnCurrentTimestamp (google.protobuf.Empty) returns (google.protobuf.Timestamp);
 }
 
 message BasicRequest{
@@ -31,10 +32,7 @@ message UserRole{
   string name = 1;
 }
 message UserRepoReply{
-  repeated User users = 2;
-}
-message User{
-  string Username = 1;
+  repeated UserInfoReply users = 1;
 }
 
 

@@ -19,6 +19,7 @@ namespace FunctionServer.Services
     {
         public FunctionsServiceImpl() { }
 
+        [Authorize(Roles = "POWERUSER")]
         public override Task<UserInfoReply> GetUserInfoRpc(UserRequest p_request, ServerCallContext p_context)
         {
             var identity = p_context.GetHttpContext().User.Identity as ClaimsIdentity;
@@ -52,42 +53,43 @@ namespace FunctionServer.Services
 
         }
 
+        [Authorize(Roles = "ADMIN")]
         public override Task<UserRepoReply> GetUserAllUsers(Empty p_request, ServerCallContext p_context)
         {
             var reply = new UserRepoReply();
             foreach (var user in UserRepo.Users())
             {
-                reply.Users.Add(new User()
+                var u = new UserInfoReply();
+                u.Username = user.UserName;
+                u.Emailaddress = user.EmailAddress;
+                foreach (var urole in user.Roles)
                 {
-                    Username = user.UserName
-                });
-                
+                    u.Roles.Add(new UserRole()
+                    {
+                         Name = urole.ToString()
+                    });
+                }
+                reply.Users.Add(u);
             }
             
             return Task.FromResult(reply);
         }
 
-        public override Task<BasicReply> GetSumRpc(BasicRequest p_request, ServerCallContext p_context)
-        {
-            int val = 0;
-            foreach (var num in p_request.Content.Split(' '))
-            {
-                val += int.Parse(num);
-            }
-            
-            
-            return Task.FromResult(new BasicReply()
-            {
-                Content = val.ToString()
-            });
-        }
 
-        public override Task<BasicReply> ReturnUtcDate(Empty request, ServerCallContext context)
+
+        [Authorize(Roles = "PRIVATE_USER")]
+        public override Task<BasicReply> ReturnUtcDate(Empty p_request, ServerCallContext p_context)
         {
             return Task.FromResult(new BasicReply()
             {
                 Content = DateTime.UtcNow.ToString()
             });
+        }
+
+        [Authorize]
+        public override Task<Timestamp> ReturnCurrentTimestamp(Empty p_request, ServerCallContext p_context)
+        {
+            return Task.FromResult(new Timestamp());
         }
     }
 }
