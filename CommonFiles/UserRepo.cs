@@ -12,6 +12,7 @@ namespace CommonFiles
             users.Add(new ClientUser(){UserName = "user1", EmailAddress = "user1@steelcloud.com", DOB = DateTime.Parse("02/02/2002"), Roles = new enRoles[] {enRoles.POWERUSER}});
             users.Add(new ClientUser(){UserName = "user2", EmailAddress = "user2@steelcloud.com", DOB = DateTime.Parse("03/03/2003"), Roles = new enRoles[] {enRoles.PRIVATE_USER}});
             users.Add(new ClientUser(){UserName = "user3", EmailAddress = "user3@steelcloud.com", DOB = DateTime.Parse("04/04/2004"), Roles = new enRoles[] {enRoles.PUBLIC_USER}});
+            users.Add(new ClientUser(){UserName = "user4", EmailAddress = "user4@steelcloud.com", DOB = DateTime.Parse("05/05/2004"), Roles = new enRoles[]{}});
             return users;
         }
         [Flags]

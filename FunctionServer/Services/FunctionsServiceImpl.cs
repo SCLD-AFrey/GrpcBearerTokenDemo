@@ -19,7 +19,7 @@ namespace FunctionServer.Services
     {
         public FunctionsServiceImpl() { }
 
-        [Authorize(Roles = "POWERUSER")]
+        [Authorize(Roles = "ADMIN, POWERUSER")]
         public override Task<UserInfoReply> GetUserInfoRpc(UserRequest p_request, ServerCallContext p_context)
         {
             var identity = p_context.GetHttpContext().User.Identity as ClaimsIdentity;
@@ -77,7 +77,7 @@ namespace FunctionServer.Services
 
 
 
-        [Authorize(Roles = "PRIVATE_USER")]
+        [Authorize(Roles = "ADMIN, POWERUSER, PRIVATE_USER")]
         public override Task<BasicReply> ReturnUtcDate(Empty p_request, ServerCallContext p_context)
         {
             return Task.FromResult(new BasicReply()

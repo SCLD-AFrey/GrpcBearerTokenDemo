@@ -27,8 +27,8 @@ namespace ClientRequester
             Console.WriteLine();
             Console.WriteLine("Press a key:");
             Console.WriteLine($"1: Authenticate as...");
-            Console.WriteLine($"2: Get All Users         [POWERUSER]");
-            Console.WriteLine($"3: Get Current User Info [ADMIN]");
+            Console.WriteLine($"2: Get All Users         [ADMIN]");
+            Console.WriteLine($"3: Get Current User Info [POWERUSER]");
             Console.WriteLine($"4: Return UTC Date       [PRIVATE_USER]");
             Console.WriteLine($"5: Get Current Timestamp [ALL AUTH USERS]");
             Console.WriteLine($"6: View Bearer Token");
@@ -78,10 +78,6 @@ namespace ClientRequester
                         Console.WriteLine($"{key.ToString()} is not recognized");
                         break;
                 }
-                
-                
-
-
 
             } while (!key.Equals(ConsoleKey.Q));
         }
