@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using FunctionServerProto;
-using CommonFiles;
 
 namespace ClientRequester
 {
-    class Program
+    static class Program
     {
         private static string _bearerToken;
         private static string _username;
@@ -41,11 +39,14 @@ namespace ClientRequester
                 
                 if (_bearerToken != null)
                 {
-                    _clientHeader = new Metadata();
-                    _clientHeader.Add("Authorization", $"Bearer {_bearerToken}");
+                    _clientHeader = new Metadata
+                    {
+                        {
+                            "Authorization", $"Bearer {_bearerToken}"
+                        }
+                    };
                 }
 
-                string input;
                 switch (key)
                 {
                     case ConsoleKey.D1:
@@ -82,12 +83,12 @@ namespace ClientRequester
             } while (!key.Equals(ConsoleKey.Q));
         }
 
-        private async static void GetCurrentTimestamp(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetCurrentTimestamp(FunctionsService.FunctionsServiceClient p_client)
         {
             try
             {
-                var response = p_client.ReturnCurrentTimestamp(new Empty(), _clientHeader);
-                Console.WriteLine($"The current server time is  {response.ToDateTime().ToString("HH:mm:ss tt zz")}");
+                var response = await p_client.ReturnCurrentTimestampAsync(new Empty(), _clientHeader);
+                Console.WriteLine($"The current server time is  {response.ToDateTime():HH:mm:ss tt zz}");
             }
             catch (RpcException exception)
             {
@@ -96,12 +97,12 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private async static void GetUtcDate(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetUtcDate(FunctionsService.FunctionsServiceClient p_client)
         {
             try
             {
                 var response = await p_client.ReturnUtcDateAsync(new Empty(), _clientHeader);
-                Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content).ToString("mm/dd/yyyy")}");
+                Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content):mm/dd/yyyy}");
             }
             catch (RpcException exception)
             {
@@ -110,7 +111,7 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private async static void GetAllUsers(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetAllUsers(FunctionsService.FunctionsServiceClient p_client)
         {
             try
             {
@@ -132,7 +133,7 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private async static void GetUserInfo(FunctionsService.FunctionsServiceClient p_client, string p_username)
+        private static async void GetUserInfo(FunctionsService.FunctionsServiceClient p_client, string p_username)
         {
             try
             {
@@ -154,7 +155,7 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private async static void DoAuthentication(string p_username)
+        private static async void DoAuthentication(string p_username)
         {
             Console.WriteLine($"Authenticating as {p_username}...");
             _bearerToken = null;
@@ -173,19 +174,27 @@ namespace ClientRequester
 
         private static async Task<string> AuthenticateUser(string p_username)
         {
-            using var httpClient = new HttpClient();
-            using var request = new HttpRequestMessage
+            try
             {
-                RequestUri = new Uri($"{Address}/generateJwtToken?name={p_username}"),
-                Method = HttpMethod.Get,
-                Version = new Version(2, 0)
-            };
-            using var tokenResponse = await httpClient.SendAsync(request);
-            tokenResponse.EnsureSuccessStatusCode();
+                using var httpClient = new HttpClient();
+                using var request = new HttpRequestMessage
+                {
+                    RequestUri = new Uri($"{Address}/generateJwtToken?name={p_username}"),
+                    Method = HttpMethod.Get,
+                    Version = new Version(2, 0)
+                };
+                using var tokenResponse = await httpClient.SendAsync(request);
+                tokenResponse.EnsureSuccessStatusCode();
 
-            var token = await tokenResponse.Content.ReadAsStringAsync();
+                var token = await tokenResponse.Content.ReadAsStringAsync();
 
-            return token;
+                return token;
+            }
+            catch (Exception exception)
+            {
+                return null;
+            }
+
         }
     }
 }

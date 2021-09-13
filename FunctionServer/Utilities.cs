@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FunctionServer
 {
-    public class Utilities
+    public static class Utilities
     {
         public static string GenerateJwtToken(string p_username, SecurityKey p_securityKey, JwtSecurityTokenHandler p_jwtTokenHandler)
         {            
@@ -19,7 +19,7 @@ namespace FunctionServer
             SigningCredentials credentials;
             Collection<UserRepo.ClientUser> users = UserRepo.Users();
             
-            user = users.Where(o => o.UserName == p_username.ToLower()).FirstOrDefault();
+            user = users.FirstOrDefault(o => o.UserName == p_username.ToLower());
 
             if (user != null)
             {
@@ -33,7 +33,7 @@ namespace FunctionServer
 
                 if (user.Roles.Length == 0)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, UserRepo.enRoles.PUBLIC_USER.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Role, UserRepo.enmEnRoles.PUBLIC_USER.ToString()));
                 }
                 else
                 {

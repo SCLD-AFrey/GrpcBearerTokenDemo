@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Globalization;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 using CommonFiles;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using FunctionServerProto;
-using Microsoft.AspNetCore.Http;
 
 namespace FunctionServer.Services
 {
@@ -26,29 +22,33 @@ namespace FunctionServer.Services
 
             var roles = new List<string>();
             var reply = new UserInfoReply();
-            foreach (var claim in identity.Claims)
-            {
-                if (claim.Type.Equals(ClaimTypes.Name))
+            if (identity != null)
+                foreach (var claim in identity.Claims)
                 {
-                    reply.Username = claim.Value;
-                }
-                if (claim.Type.Equals(ClaimTypes.Email))
-                {
-                    reply.Emailaddress = claim.Value;
-                }
-                if (claim.Type.Equals(ClaimTypes.DateOfBirth))
-                {
-                    reply.Dob = claim.Value;
-                }
-                if (claim.Type.Equals(ClaimTypes.Role))
-                {
-                    reply.Roles.Add(new UserRole()
+                    if (claim.Type.Equals(ClaimTypes.Name))
                     {
-                        Name = claim.Value
-                    });
+                        reply.Username = claim.Value;
+                    }
+
+                    if (claim.Type.Equals(ClaimTypes.Email))
+                    {
+                        reply.Emailaddress = claim.Value;
+                    }
+
+                    if (claim.Type.Equals(ClaimTypes.DateOfBirth))
+                    {
+                        reply.Dob = claim.Value;
+                    }
+
+                    if (claim.Type.Equals(ClaimTypes.Role))
+                    {
+                        reply.Roles.Add(new UserRole()
+                        {
+                            Name = claim.Value
+                        });
+                    }
                 }
-            }
-            
+
             return Task.FromResult(reply);
 
         }
@@ -59,14 +59,12 @@ namespace FunctionServer.Services
             var reply = new UserRepoReply();
             foreach (var user in UserRepo.Users())
             {
-                var u = new UserInfoReply();
-                u.Username = user.UserName;
-                u.Emailaddress = user.EmailAddress;
-                foreach (var urole in user.Roles)
+                var u = new UserInfoReply {Username = user.UserName, Emailaddress = user.EmailAddress};
+                foreach (var r in user.Roles)
                 {
                     u.Roles.Add(new UserRole()
                     {
-                         Name = urole.ToString()
+                         Name = r.ToString()
                     });
                 }
                 reply.Users.Add(u);
@@ -82,7 +80,7 @@ namespace FunctionServer.Services
         {
             return Task.FromResult(new BasicReply()
             {
-                Content = DateTime.UtcNow.ToString()
+                Content = DateTime.UtcNow.ToString(CultureInfo.CurrentCulture)
             });
         }
 

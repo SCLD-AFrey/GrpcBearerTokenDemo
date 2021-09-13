@@ -15,11 +15,11 @@ namespace FunctionServer
     {
         private readonly JwtSecurityTokenHandler m_jwtTokenHandler = new JwtSecurityTokenHandler();
         private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection p_services)
         {
-            services.AddGrpc();
+            p_services.AddGrpc();
             
-            services.AddAuthorization(options =>
+            p_services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
                 {
@@ -27,7 +27,7 @@ namespace FunctionServer
                     policy.RequireClaim(ClaimTypes.Name);
                 });
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            p_services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters =
@@ -43,18 +43,18 @@ namespace FunctionServer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder p_app, IWebHostEnvironment p_env)
         {
-            if (env.IsDevelopment())
+            if (p_env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                p_app.UseDeveloperExceptionPage();
             }
 
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
+            p_app.UseRouting();
+            p_app.UseAuthentication();
+            p_app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            p_app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<Services.FunctionsServiceImpl>();
 
