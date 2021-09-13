@@ -19,7 +19,7 @@ namespace FunctionServer.Services
     {
         public FunctionsServiceImpl() { }
 
-        [Authorize(Roles = "ADMIN, POWERUSER")]
+        [Authorize(Roles = "ADMIN, POWERUSER, PRIVATE_USER")]
         public override Task<UserInfoReply> GetUserInfoRpc(UserRequest p_request, ServerCallContext p_context)
         {
             var identity = p_context.GetHttpContext().User.Identity as ClaimsIdentity;

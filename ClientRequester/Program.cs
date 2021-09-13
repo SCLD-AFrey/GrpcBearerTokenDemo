@@ -28,10 +28,10 @@ namespace ClientRequester
             Console.WriteLine("Press a key:");
             Console.WriteLine($"1: Authenticate as...");
             Console.WriteLine($"2: Get All Users         [ADMIN]");
-            Console.WriteLine($"3: Get Current User Info [POWERUSER]");
-            Console.WriteLine($"4: Return UTC Date       [PRIVATE_USER]");
+            Console.WriteLine($"3: Get Current User Info [ADMIN, POWERUSER, PRIVATE_USER]");
+            Console.WriteLine($"4: Return UTC Date       [ADMIN, POWERUSER, PRIVATE_USER]");
             Console.WriteLine($"5: Get Current Timestamp [ALL AUTH USERS]");
-            Console.WriteLine($"6: View Bearer Token");
+            Console.WriteLine($"6: View Bearer Token     [LOCAL]");
             Console.WriteLine($"Q: Quit");
             Console.WriteLine("-------------------");
 
@@ -84,45 +84,73 @@ namespace ClientRequester
 
         private async static void GetCurrentTimestamp(FunctionsService.FunctionsServiceClient p_client)
         {
-            var response = p_client.ReturnCurrentTimestamp(new Empty(), _clientHeader);
-            Console.WriteLine($"The current server time is  {response.ToDateTime().ToString("HH:mm:ss tt zz")}");
+            try
+            {
+                var response = p_client.ReturnCurrentTimestamp(new Empty(), _clientHeader);
+                Console.WriteLine($"The current server time is  {response.ToDateTime().ToString("HH:mm:ss tt zz")}");
+            }
+            catch (RpcException exception)
+            {
+                Console.WriteLine($"Request Failed: {exception.StatusCode}");
+            }
             Console.WriteLine("-------------------");
         }
 
         private async static void GetUtcDate(FunctionsService.FunctionsServiceClient p_client)
         {
-            var response = await p_client.ReturnUtcDateAsync(new Empty(), _clientHeader);
-            Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content).ToString("mm/dd/yyyy")}");
+            try
+            {
+                var response = await p_client.ReturnUtcDateAsync(new Empty(), _clientHeader);
+                Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content).ToString("mm/dd/yyyy")}");
+            }
+            catch (RpcException exception)
+            {
+                Console.WriteLine($"Request Failed: {exception.StatusCode}");
+            }
             Console.WriteLine("-------------------");
         }
 
         private async static void GetAllUsers(FunctionsService.FunctionsServiceClient p_client)
-        {            
-            var response = await p_client.GetUserAllUsersAsync(new Empty(), _clientHeader);
-            int cnt = 0;
-            foreach (var user in response.Users)
+        {
+            try
             {
-                cnt++;
-                Console.Write($"{cnt}. {user.Username}");
-                foreach (var role in user.Roles)
-                    Console.Write($" -{role.Name}");
-                Console.Write(Environment.NewLine);
+                var response = await p_client.GetUserAllUsersAsync(new Empty(), _clientHeader);
+                int cnt = 0;
+                foreach (var user in response.Users)
+                {
+                    cnt++;
+                    Console.Write($"{cnt}. {user.Username}");
+                    foreach (var role in user.Roles)
+                        Console.Write($" -{role.Name}");
+                    Console.Write(Environment.NewLine);
+                }
+            }
+            catch (RpcException exception)
+            {
+                Console.WriteLine($"Request Failed: {exception.StatusCode}");
             }
             Console.WriteLine("-------------------");
         }
 
         private async static void GetUserInfo(FunctionsService.FunctionsServiceClient p_client, string p_username)
         {
-            var response = await p_client.GetUserInfoRpcAsync(new UserRequest()
+            try
             {
-                Username = _username
-            }, _clientHeader);
-                        
-            Console.WriteLine($"Username: {response.Username}");
-            foreach (var role in response.Roles)
-                Console.WriteLine($"Role(s): {role.Name}");
-            Console.WriteLine($"Email Address: {response.Dob}");
-            Console.WriteLine($"Birthdate: {response.Dob}");
+                var response = await p_client.GetUserInfoRpcAsync(new UserRequest()
+                {
+                    Username = _username
+                }, _clientHeader);
+                            
+                Console.WriteLine($"Username: {response.Username}");
+                foreach (var role in response.Roles)
+                    Console.WriteLine($"Role(s): {role.Name}");
+                Console.WriteLine($"Email Address: {response.Dob}");
+                Console.WriteLine($"Birthdate: {response.Dob}");
+            }
+            catch (RpcException exception)
+            {
+                Console.WriteLine($"Request Failed: {exception.StatusCode}");
+            }
             Console.WriteLine("-------------------");
         }
 
