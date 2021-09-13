@@ -27,7 +27,7 @@ namespace FunctionServer
                 
                 claims.Add(new Claim(ClaimTypes.Name, p_username));
                 claims.Add(new Claim(ClaimTypes.DateOfBirth, user.DOB.ToString()));
-                claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
+                claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress ?? throw new InvalidOperationException()));
                 credentials = new SigningCredentials(p_securityKey, SecurityAlgorithms.HmacSha256);
 
 

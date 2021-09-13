@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using CommonFiles;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -12,26 +13,30 @@ namespace ClientRequester
     {
         private static string _bearerToken;
         private static string _username;
-        private const string Address = "https://localhost:5001";
         private static Metadata _clientHeader;
         
         public static async Task Main(string[] args)
         {
             ConsoleKey key;
-            using var channel = GrpcChannel.ForAddress(Address);
+            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
             var client = new FunctionsService.FunctionsServiceClient(channel);
+            
 
-            Console.WriteLine("gRPC Bearer Token Demo");
-            Console.WriteLine();
-            Console.WriteLine("Press a key:");
-            Console.WriteLine($"1: Authenticate as...");
-            Console.WriteLine($"2: Get All Users         [ADMIN]");
-            Console.WriteLine($"3: Get Current User Info [ADMIN, POWERUSER, PRIVATE_USER]");
-            Console.WriteLine($"4: Return UTC Date       [ADMIN, POWERUSER, PRIVATE_USER]");
-            Console.WriteLine($"5: Get Current Timestamp [ALL AUTH USERS]");
-            Console.WriteLine($"6: View Bearer Token     [LOCAL]");
-            Console.WriteLine($"Q: Quit");
-            Console.WriteLine("-------------------");
+            string inst = "gRPC Bearer Token Demo" + Environment.NewLine
+                                                   + Environment.NewLine
+                                                   + "Press a key:"+ Environment.NewLine
+                                                   + "1: Authenticate as..." + Environment.NewLine
+                                                   + "2: Get All Users         [ADMIN]" + Environment.NewLine
+                                                   + "3: Get Current User Info [ADMIN, POWERUSER, PRIVATE_USER]" + Environment.NewLine
+                                                   + "4: Return UTC Date       [ADMIN, POWERUSER, PRIVATE_USER]" + Environment.NewLine
+                                                   + "5: Get Current Timestamp [ALL AUTH USERS]" + Environment.NewLine
+                                                   + "6: View Bearer Token     [LOCAL]" + Environment.NewLine
+                                                   + "7: Clear Token" + Environment.NewLine
+                                                   + "H: See Help" + Environment.NewLine
+                                                   + "Q: Quit" + Environment.NewLine
+                                                   + "-------------------" + Environment.NewLine;
+
+            Console.Write(inst);
 
             do
             {
@@ -45,6 +50,10 @@ namespace ClientRequester
                             "Authorization", $"Bearer {_bearerToken}"
                         }
                     };
+                }
+                else
+                {
+                    _clientHeader = new Metadata();
                 }
 
                 switch (key)
@@ -71,10 +80,17 @@ namespace ClientRequester
                         Console.WriteLine($"Bearer Token: {_bearerToken}");
                         Console.WriteLine("-------------------");
                         break;
+                    case ConsoleKey.D7:
+                        _bearerToken = null;
+                        Console.WriteLine($"Token Cleared");
+                        Console.WriteLine("-------------------");
+                        break;
+                    case ConsoleKey.H:
+                        Console.Write(inst);
+                        break;
                     case ConsoleKey.Q:
                         Console.WriteLine($"...Shutdown");
                         break;
-                    
                     default:
                         Console.WriteLine($"{key.ToString()} is not recognized");
                         break;
@@ -137,29 +153,45 @@ namespace ClientRequester
         {
             try
             {
+                if (p_username == null)
+                {
+                    throw new Exception("User not authenticated");
+                }
+
                 var response = await p_client.GetUserInfoRpcAsync(new UserRequest()
                 {
-                    Username = _username
+                    Username = p_username
                 }, _clientHeader);
-                            
+
                 Console.WriteLine($"Username: {response.Username}");
                 foreach (var role in response.Roles)
                     Console.WriteLine($"Role(s): {role.Name}");
-                Console.WriteLine($"Email Address: {response.Dob}");
+                Console.WriteLine($"Email Address: {response.Emailaddress}");
                 Console.WriteLine($"Birthdate: {response.Dob}");
             }
             catch (RpcException exception)
             {
                 Console.WriteLine($"Request Failed: {exception.StatusCode}");
             }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"Request Failed: {exception.Message}");
+            }
             Console.WriteLine("-------------------");
         }
 
         private static async void DoAuthentication(string p_username)
         {
+            
+            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
+            var client = new FunctionsService.FunctionsServiceClient(channel);
+            
+            
             Console.WriteLine($"Authenticating as {p_username}...");
             _bearerToken = null;
             _bearerToken = await AuthenticateUser(_username);
+            
+            
             if (_bearerToken != null)
             {
                 Console.WriteLine($"Successfully authenticated. ");
@@ -179,7 +211,7 @@ namespace ClientRequester
                 using var httpClient = new HttpClient();
                 using var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri($"{Address}/generateJwtToken?name={p_username}"),
+                    RequestUri = new Uri($"https://{Constants.Host}:{Constants.Port}/generateJwtToken?name={p_username}"),
                     Method = HttpMethod.Get,
                     Version = new Version(2, 0)
                 };
