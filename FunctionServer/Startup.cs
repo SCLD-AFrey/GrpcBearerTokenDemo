@@ -19,7 +19,10 @@ namespace FunctionServer
         private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
+            services.AddGrpc(options =>
+            {
+                options.Interceptors.Add<Services.SampleInterceptor>();
+            });
             
             services.AddAuthorization(options =>
             {
