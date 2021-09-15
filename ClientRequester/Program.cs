@@ -14,14 +14,14 @@ namespace ClientRequester
         private static string _bearerToken;
         private static string _username;
         private static Metadata _clientHeader;
+        private static FunctionsService.FunctionsServiceClient _client;
         
         public static async Task Main(string[] args)
         {
             ConsoleKey key;
             using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
-            var client = new FunctionsService.FunctionsServiceClient(channel);
+            _client = new FunctionsService.FunctionsServiceClient(channel);
             
-
             string inst = "gRPC Bearer Token Demo" + Environment.NewLine
                                                    + Environment.NewLine
                                                    + "Press a key:"+ Environment.NewLine
@@ -29,8 +29,8 @@ namespace ClientRequester
                                                    + "2: Get All Users         [ADMIN]" + Environment.NewLine
                                                    + "3: Get Current User Info [ADMIN, POWERUSER, PRIVATE_USER]" + Environment.NewLine
                                                    + "4: Return UTC Date       [ADMIN, POWERUSER, PRIVATE_USER]" + Environment.NewLine
-                                                   + "5: Get Current Timestamp [ALL AUTH USERS]" + Environment.NewLine
-                                                   + "6: View Bearer Token     [LOCAL]" + Environment.NewLine
+                                                   + "5: Get Current Timestamp [ALL AUTH USERS]" + Environment.NewLine + Environment.NewLine
+                                                   + "6: View Bearer Token" + Environment.NewLine
                                                    + "7: Clear Token" + Environment.NewLine
                                                    + "H: See Help" + Environment.NewLine
                                                    + "Q: Quit" + Environment.NewLine
@@ -60,21 +60,21 @@ namespace ClientRequester
                 {
                     case ConsoleKey.D1:
                         Console.Write("Enter username: ");
-                        _username = Console.ReadLine();
-                        if (_username.Length == 0) _username = Environment.UserName;
-                        DoAuthentication(_username);
+                        var inUsername = Console.ReadLine();
+                        if (string.IsNullOrEmpty(inUsername)) inUsername = Environment.UserName;
+                        DoAuthentication(inUsername);
                         break;
                     case ConsoleKey.D2:
-                        GetAllUsers(client);
+                        GetAllUsers();
                         break;
                     case ConsoleKey.D3:
-                        GetUserInfo(client, _username);
+                        GetUserInfo(_username);
                         break;
                     case ConsoleKey.D4:
-                        GetUtcDate(client);
+                        GetUtcDate();
                         break;
                     case ConsoleKey.D5:
-                        GetCurrentTimestamp(client);
+                        GetCurrentTimestamp();
                         break;
                     case ConsoleKey.D6:
                         Console.WriteLine($"Bearer Token: {_bearerToken}");
@@ -99,11 +99,11 @@ namespace ClientRequester
             } while (!key.Equals(ConsoleKey.Q));
         }
 
-        private static async void GetCurrentTimestamp(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetCurrentTimestamp()
         {
             try
             {
-                var response = await p_client.ReturnCurrentTimestampAsync(new Empty(), _clientHeader);
+                var response = await _client.ReturnCurrentTimestampAsync(new Empty(), _clientHeader);
                 Console.WriteLine($"The current server time is  {response.ToDateTime():HH:mm:ss tt zz}");
             }
             catch (RpcException exception)
@@ -113,11 +113,11 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private static async void GetUtcDate(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetUtcDate()
         {
             try
             {
-                var response = await p_client.ReturnUtcDateAsync(new Empty(), _clientHeader);
+                var response = await _client.ReturnUtcDateAsync(new Empty(), _clientHeader);
                 Console.WriteLine($"The current UTC Date is {DateTime.Parse(response.Content):mm/dd/yyyy}");
             }
             catch (RpcException exception)
@@ -127,11 +127,11 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private static async void GetAllUsers(FunctionsService.FunctionsServiceClient p_client)
+        private static async void GetAllUsers()
         {
             try
             {
-                var response = await p_client.GetUserAllUsersAsync(new Empty(), _clientHeader);
+                var response = await _client.GetUserAllUsersAsync(new Empty(), _clientHeader);
                 int cnt = 0;
                 foreach (var user in response.Users)
                 {
@@ -149,7 +149,7 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
-        private static async void GetUserInfo(FunctionsService.FunctionsServiceClient p_client, string p_username)
+        private static async void GetUserInfo(string p_username)
         {
             try
             {
@@ -158,7 +158,7 @@ namespace ClientRequester
                     throw new Exception("User not authenticated");
                 }
 
-                var response = await p_client.GetUserInfoRpcAsync(new UserRequest()
+                var response = await _client.GetUserInfoRpcAsync(new UserRequest()
                 {
                     Username = p_username
                 }, _clientHeader);
@@ -189,11 +189,12 @@ namespace ClientRequester
             
             Console.WriteLine($"Authenticating as {p_username}...");
             _bearerToken = null;
-            _bearerToken = await AuthenticateUser(_username);
+            _bearerToken = await AuthenticateUser(p_username);
             
             
             if (_bearerToken != null)
             {
+                _username = p_username;
                 Console.WriteLine($"Successfully authenticated. ");
                 Console.WriteLine($" -Token ({_bearerToken.Length} chars): {_bearerToken.Substring(0,25)}...");
             }

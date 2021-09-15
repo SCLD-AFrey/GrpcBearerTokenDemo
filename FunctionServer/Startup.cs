@@ -17,19 +17,20 @@ namespace FunctionServer
     {
         private readonly JwtSecurityTokenHandler m_jwtTokenHandler = new JwtSecurityTokenHandler();
         private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
-        public void ConfigureServices(IServiceCollection p_services)
+        public void ConfigureServices(IServiceCollection services)
         {
-            p_services.AddGrpc();
+            services.AddGrpc();
             
-            p_services.AddAuthorization(options =>
+            services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
                 {
                     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireClaim(ClaimTypes.Name);
+                    policy.RequireClaim(ClaimTypes.Role);
                 });
             });
-            p_services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters =

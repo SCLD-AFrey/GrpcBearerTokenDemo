@@ -13,6 +13,9 @@ namespace FunctionServer
     {
         public static string GenerateJwtToken(string p_username, SecurityKey p_securityKey, JwtSecurityTokenHandler p_jwtTokenHandler)
         {            
+            Console.WriteLine($"Attempting to Authenticate {p_username}");
+            
+            
             var claims = new List<Claim>();
             var roles = new List<string>();
             UserRepo.ClientUser user;
@@ -26,7 +29,7 @@ namespace FunctionServer
                 
                 
                 claims.Add(new Claim(ClaimTypes.Name, p_username));
-                claims.Add(new Claim(ClaimTypes.DateOfBirth, user.DOB.ToString()));
+                claims.Add(new Claim(ClaimTypes.DateOfBirth, user.Dob.ToString()));
                 claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress ?? throw new InvalidOperationException()));
                 credentials = new SigningCredentials(p_securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -52,10 +55,17 @@ namespace FunctionServer
                     claims.ToArray(), 
                     expires: DateTime.Now.AddSeconds(60), 
                     signingCredentials: credentials);
-                return p_jwtTokenHandler.WriteToken(token);
+
+                var strToken = p_jwtTokenHandler.WriteToken(token);
+                
+                
+                Console.WriteLine($"Successfully Authenticated {p_username}. Token: {strToken}" );
+                
+                return strToken;
             }
             else
             {
+                Console.WriteLine($"Failed to Authenticated {p_username}." );
                 Console.WriteLine($"{p_username} not found");
                 return null;
             }
