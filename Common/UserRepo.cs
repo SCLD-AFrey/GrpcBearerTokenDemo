@@ -35,10 +35,11 @@ namespace CommonFiles
         [Flags]
         public enum enmEnRoles : byte
         {
-            ADMIN   = 1 << 0,
-            POWERUSER   = 1 << 1, 
-            PRIVATE_USER = 1 << 2,
-            PUBLIC_USER = 1 << 4,
+            
+            PUBLIC_USER = 0,
+            ADMIN   = 1,
+            POWERUSER   = 2, 
+            PRIVATE_USER = 4
         }
         public class ClientUser
         {
