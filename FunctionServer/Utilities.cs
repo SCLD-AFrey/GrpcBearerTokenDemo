@@ -33,7 +33,6 @@ namespace FunctionServer
                 claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress ?? throw new InvalidOperationException()));
                 credentials = new SigningCredentials(p_securityKey, SecurityAlgorithms.HmacSha256);
 
-
                 if (user.Roles.Length == 0)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, UserRepo.enmEnRoles.PUBLIC_USER.ToString()));

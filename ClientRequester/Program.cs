@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommonFiles;
+using DeviceId;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -18,6 +19,18 @@ namespace ClientRequester
         
         public static async Task Main(string[] args)
         {
+            string deviceId = new DeviceIdBuilder()
+                .AddMachineName()
+                .AddOsVersion()
+                .AddFileToken(@"C:\example-device-token.txt")
+                .ToString();
+            
+            
+            
+            
+            
+            
+            
             ConsoleKey key;
             using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
             _client = new FunctionsService.FunctionsServiceClient(channel);

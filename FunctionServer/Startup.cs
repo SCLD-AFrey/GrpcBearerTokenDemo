@@ -16,7 +16,8 @@ namespace FunctionServer
     public class Startup
     {
         private readonly JwtSecurityTokenHandler m_jwtTokenHandler = new JwtSecurityTokenHandler();
-        private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
+        //private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
+        private readonly SymmetricSecurityKey m_securityKey = new SymmetricSecurityKey(Guid.Parse("76150A70-DA3D-4FAE-B584-5C51307F9A04").ToByteArray());
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc(options =>
