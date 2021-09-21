@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Security;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommonFiles;
 using DeviceId;
@@ -14,23 +19,13 @@ namespace ClientRequester
     {
         private static string _bearerToken;
         private static string _username;
+        private static string _deviceId;
         private static Metadata _clientHeader;
         private static FunctionsService.FunctionsServiceClient _client;
         
         public static async Task Main(string[] args)
         {
-            string deviceId = new DeviceIdBuilder()
-                .AddMachineName()
-                .AddOsVersion()
-                .AddFileToken(@"C:\example-device-token.txt")
-                .ToString();
-            
-            
-            
-            
-            
-            
-            
+            _deviceId = CreateDeviceFile();
             ConsoleKey key;
             using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
             _client = new FunctionsService.FunctionsServiceClient(channel);
@@ -59,59 +54,99 @@ namespace ClientRequester
                 {
                     _clientHeader = new Metadata
                     {
-                        {
-                            "Authorization", $"Bearer {_bearerToken}"
-                        }
+                        {"Authorization", $"Bearer {_bearerToken}"},
+                        {"DeviceId", _deviceId},
+                        {"MachineName", System.Environment.MachineName}
                     };
                 }
                 else
                 {
-                    _clientHeader = new Metadata();
+                    _clientHeader = new Metadata
+                    {
+                        {"DeviceId", _deviceId},
+                        {"MachineName", System.Environment.MachineName}
+                    };
                 }
 
-                switch (key)
+                try
                 {
-                    case ConsoleKey.D1:
-                        Console.Write("Enter username: ");
-                        var inUsername = Console.ReadLine();
-                        if (string.IsNullOrEmpty(inUsername)) inUsername = Environment.UserName;
-                        DoAuthentication(inUsername);
-                        break;
-                    case ConsoleKey.D2:
-                        GetAllUsers();
-                        break;
-                    case ConsoleKey.D3:
-                        GetUserInfo(_username);
-                        break;
-                    case ConsoleKey.D4:
-                        GetUtcDate();
-                        break;
-                    case ConsoleKey.D5:
-                        GetCurrentTimestamp();
-                        break;
-                    case ConsoleKey.D6:
-                        Console.WriteLine($"Bearer Token: {_bearerToken}");
-                        Console.WriteLine("-------------------");
-                        break;
-                    case ConsoleKey.D7:
-                        _bearerToken = null;
-                        Console.WriteLine($"Token Cleared");
-                        Console.WriteLine("-------------------");
-                        break;
-                    case ConsoleKey.H:
-                        Console.Write(inst);
-                        break;
-                    case ConsoleKey.Q:
-                        Console.WriteLine($"...Shutdown");
-                        break;
-                    default:
-                        Console.WriteLine($"{key.ToString()} is not recognized");
-                        break;
+
+                    switch (key)
+                    {
+                        case ConsoleKey.D1:
+                            Console.Write("Enter username: ");
+                            var inUsername = Console.ReadLine();
+                            Console.Write("Enter password: ");
+                            var inPassword = Console.ReadLine();
+
+                            if (string.IsNullOrEmpty(inUsername) || string.IsNullOrEmpty(inPassword))
+                            {
+                                throw new Exception("Username and Password Required");
+                            }
+
+                            DoLogin(inUsername, inPassword);
+                            DoAuthentication(inUsername);
+                            break;
+                        case ConsoleKey.D2:
+                            GetAllUsers();
+                            break;
+                        case ConsoleKey.D3:
+                            GetUserInfo(_username);
+                            break;
+                        case ConsoleKey.D4:
+                            GetUtcDate();
+                            break;
+                        case ConsoleKey.D5:
+                            GetCurrentTimestamp();
+                            break;
+                        case ConsoleKey.D6:
+                            Console.WriteLine($"Bearer Token: {_bearerToken}");
+                            Console.WriteLine("-------------------");
+                            break;
+                        case ConsoleKey.D7:
+                            _bearerToken = null;
+                            Console.WriteLine($"Token Cleared");
+                            Console.WriteLine("-------------------");
+                            break;
+                        case ConsoleKey.H:
+                            Console.Write(inst);
+                            break;
+                        case ConsoleKey.Q:
+                            Console.WriteLine($"...Shutdown");
+                            break;
+                        default:
+                            Console.WriteLine($"{key.ToString()} is not recognized");
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR: {e.Message}");
                 }
 
             } while (!key.Equals(ConsoleKey.Q));
         }
 
+
+        private static string CreateDeviceFile()
+        {
+            var deviceId = new DeviceIdBuilder().AddMachineName().AddOsVersion().ToString();
+            var machineFile = Path.Combine(Constants.CommonPath, Constants.DeviceFile);
+            if (!File.Exists(machineFile))
+            {
+                List<Machine> machines = new List<Machine>();
+                machines.Add(new Machine() {DeviceId = deviceId});
+                machines.Add(new Machine() {DeviceId = "test1"});
+                machines.Add(new Machine() {DeviceId = "test2"});
+                machines.Add(new Machine() {DeviceId = "test3"});
+
+                string json = JsonSerializer.Serialize(machines);
+                File.WriteAllText(machineFile, json);
+            }
+
+            return deviceId;
+        }
+        
         private static async void GetCurrentTimestamp()
         {
             try
@@ -193,6 +228,19 @@ namespace ClientRequester
             Console.WriteLine("-------------------");
         }
 
+        private static void DoLogin(string? p_inUsername, string? p_inPassword)
+        {
+            var user = UserRepo.Users().FirstOrDefault(o => o.UserName == p_inUsername);
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            if (UserRepo.HashPassword(user.Password) == UserRepo.HashPassword(p_inPassword))
+            {
+                throw new Exception("Incorrect Password.");     
+            }
+        }
         private static async void DoAuthentication(string p_username)
         {
             

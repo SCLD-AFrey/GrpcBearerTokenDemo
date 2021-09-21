@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Security;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CommonFiles
 {
@@ -11,23 +14,23 @@ namespace CommonFiles
             {
                 new ClientUser()
                 {
-                    UserName = "afrey", EmailAddress = "afrey@steelcloud.com", Dob = DateTime.Parse("01/01/2001"), Roles = new enmEnRoles[] {enmEnRoles.ADMIN, enmEnRoles.POWERUSER}
+                    UserName = "afrey", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "afrey@steelcloud.com", Dob = DateTime.Parse("01/01/2001"), Roles = new enmEnRoles[] {enmEnRoles.ADMIN, enmEnRoles.POWERUSER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user1", EmailAddress = "user1@steelcloud.com", Dob = DateTime.Parse("02/02/2002"), Roles = new enmEnRoles[] {enmEnRoles.POWERUSER}
+                    UserName = "user1", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user1@steelcloud.com", Dob = DateTime.Parse("02/02/2002"), Roles = new enmEnRoles[] {enmEnRoles.POWERUSER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user2", EmailAddress = "user2@steelcloud.com", Dob = DateTime.Parse("03/03/2003"), Roles = new enmEnRoles[] {enmEnRoles.PRIVATE_USER}
+                    UserName = "user2", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user2@steelcloud.com", Dob = DateTime.Parse("03/03/2003"), Roles = new enmEnRoles[] {enmEnRoles.PRIVATE_USER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user3", EmailAddress = "user3@steelcloud.com", Dob = DateTime.Parse("04/04/2004")
+                    UserName = "user3", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user3@steelcloud.com", Dob = DateTime.Parse("04/04/2004")
                 },
                 new ClientUser()
                 {
-                    UserName = "user4", EmailAddress = "user4@steelcloud.com", Dob = DateTime.Parse("05/05/2004")
+                    UserName = "user4", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user4@steelcloud.com", Dob = DateTime.Parse("05/05/2004")
                 }
             };
             return users;
@@ -44,9 +47,25 @@ namespace CommonFiles
         public class ClientUser
         {
             public string? UserName { get; init; }
+            public string? Password { get; init; }
             public UserRepo.enmEnRoles[]? Roles { get; set; } = {enmEnRoles.PUBLIC_USER};
             public string? EmailAddress { get; set; }
             public DateTime? Dob { get; set; }
         }
+        
+        
+        public static string HashPassword(string password, string algorithm = "sha256")
+        {
+            return Hash(Encoding.UTF8.GetBytes(password), algorithm);
+        }
+
+        private static string Hash(byte[] input, string algorithm = "sha256")
+        {
+            using (var hashAlgorithm = HashAlgorithm.Create(algorithm))
+            {
+                return Convert.ToBase64String(hashAlgorithm.ComputeHash(input));
+            }
+        }
+        
     }
 }
