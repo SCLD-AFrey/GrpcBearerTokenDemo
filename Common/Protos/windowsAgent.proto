@@ -1,0 +1,48 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "WindowsAgentService";
+
+package winAgent;
+
+service WinAgent
+{
+  rpc RequestTask(G_TaskRequest) returns (stream G_TaskResponse) { }
+}
+
+message G_TaskRequest{
+  string policyText = 1;
+  TaskType taskType = 2;
+  
+  enum TaskType {
+    SCAN = 0;
+    REMEDIATE = 1;
+    ROLLBACK = 2;
+  }
+}
+
+message G_TaskResponse{
+  oneof response_type{
+    G_RollbackGeneratedResponse rollbackData = 1;
+    G_ControlEvaluationCompletedResponse controlData = 2;
+  }
+}
+
+message G_RollbackGeneratedResponse{
+  string rollbackPolicyText = 1;
+}
+
+message G_ControlEvaluationCompletedResponse{
+  string ruleId = 1;
+  string currentValue = 2;
+  string expectedValue = 3;
+  ControlStatus controlStatus = 4;
+  string comment = 5;
+
+  enum ControlStatus {
+    FOUND_AND_PASSED = 0;
+    FOUND_AND_FAILED = 1;
+    NOT_FOUND_AND_CREATED = 2;
+    NOT_FOUND_AND_FAILED = 3;
+    REVERTED_BY_GROUP_POLICY = 4;
+  }
+}
