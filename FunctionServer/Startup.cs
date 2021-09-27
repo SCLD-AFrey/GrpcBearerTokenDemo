@@ -22,8 +22,8 @@ namespace FunctionServer
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<Services.SampleInterceptor>();
-                options.Interceptors.Add<Services.IpAddressAuthenticator>();
+                //options.Interceptors.Add<Services.SampleInterceptor>();
+                //options.Interceptors.Add<Services.IpAddressAuthenticator>();
             });
             
             services.AddAuthorization(options =>

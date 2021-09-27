@@ -27,7 +27,7 @@ namespace ClientRequester
         {
             _deviceId = CreateDeviceFile();
             ConsoleKey key;
-            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
+            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Ports.FunctionSecure}");
             _client = new FunctionsService.FunctionsServiceClient(channel);
             
             string inst = "gRPC Bearer Token Demo" + Environment.NewLine
@@ -244,7 +244,7 @@ namespace ClientRequester
         private static async void DoAuthentication(string p_username)
         {
             
-            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Port}");
+            using var channel = GrpcChannel.ForAddress($"https://{Constants.Host}:{Constants.Ports.FunctionSecure}");
             var client = new FunctionsService.FunctionsServiceClient(channel);
             
             
@@ -273,7 +273,7 @@ namespace ClientRequester
                 using var httpClient = new HttpClient();
                 using var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri($"https://{Constants.Host}:{Constants.Port}/generateJwtToken?name={p_username}"),
+                    RequestUri = new Uri($"https://{Constants.Host}:{Constants.Ports.FunctionSecure}/generateJwtToken?name={p_username}"),
                     Method = HttpMethod.Get,
                     Version = new Version(2, 0)
                 };

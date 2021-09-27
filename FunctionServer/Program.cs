@@ -1,6 +1,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -29,6 +30,11 @@ namespace FunctionServer
             Host.CreateDefaultBuilder(p_args)
                 .ConfigureWebHostDefaults(p_webBuilder =>
                 {
+                    p_webBuilder.ConfigureKestrel(options =>
+                    {
+                        options.Listen(IPAddress.Loopback, Constants.Ports.FunctionInsecure);
+                        options.Listen(IPAddress.Loopback, Constants.Ports.FunctionSecure, configure => configure.UseHttps());
+                    });
                     p_webBuilder.UseStartup<Startup>();
                 });
     }
