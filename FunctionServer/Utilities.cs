@@ -14,10 +14,7 @@ namespace FunctionServer
         public static string GenerateJwtToken(string p_username, SecurityKey p_securityKey, JwtSecurityTokenHandler p_jwtTokenHandler)
         {            
             Console.WriteLine($"Attempting to Authenticate {p_username}");
-            
-            
             var claims = new List<Claim>();
-            var roles = new List<string>();
             UserRepo.ClientUser user;
             SigningCredentials credentials;
             Collection<UserRepo.ClientUser> users = UserRepo.Users();
@@ -33,7 +30,6 @@ namespace FunctionServer
                 claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress ?? throw new InvalidOperationException()));
                 credentials = new SigningCredentials(p_securityKey, SecurityAlgorithms.HmacSha256);
 
-
                 if (user.Roles.Length == 0)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, UserRepo.enmEnRoles.PUBLIC_USER.ToString()));
@@ -43,11 +39,9 @@ namespace FunctionServer
                     foreach (var role in user.Roles)
                     {
                         claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
-                        roles.Add(role.ToString());
                     }
                 }
-                
-                
+
                 Console.WriteLine($"{p_username} authenticated as {string.Join(", ", user.Roles)}");
                 var token = new JwtSecurityToken(
                     "ExampleServer", 
