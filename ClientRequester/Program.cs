@@ -131,7 +131,7 @@ namespace ClientRequester
         private static string CreateDeviceFile()
         {
             var deviceId = new DeviceIdBuilder().AddMachineName().AddOsVersion().ToString();
-            var machineFile = Path.Combine(Constants.CommonPath, Constants.DeviceFile);
+            var machineFile = Path.Combine(Path.GetTempPath(), Constants.DeviceFile);
             if (!File.Exists(machineFile))
             {
                 List<Machine> machines = new List<Machine>();

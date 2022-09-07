@@ -14,23 +14,23 @@ namespace CommonFiles
             {
                 new ClientUser()
                 {
-                    UserName = "afrey", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "afrey@steelcloud.com", Dob = DateTime.Parse("01/01/2001"), Roles = new enmEnRoles[] {enmEnRoles.ADMIN, enmEnRoles.POWERUSER}
+                    UserName = "afrey", Password = @"password", EmailAddress = "afrey@steelcloud.com", Dob = DateTime.Parse("01/01/2001"), Roles = new enmEnRoles[] {enmEnRoles.ADMIN, enmEnRoles.POWERUSER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user1", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user1@steelcloud.com", Dob = DateTime.Parse("02/02/2002"), Roles = new enmEnRoles[] {enmEnRoles.POWERUSER}
+                    UserName = "user1", Password = @"password", EmailAddress = "user1@steelcloud.com", Dob = DateTime.Parse("02/02/2002"), Roles = new enmEnRoles[] {enmEnRoles.POWERUSER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user2", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user2@steelcloud.com", Dob = DateTime.Parse("03/03/2003"), Roles = new enmEnRoles[] {enmEnRoles.PRIVATE_USER}
+                    UserName = "user2", Password = @"password", EmailAddress = "user2@steelcloud.com", Dob = DateTime.Parse("03/03/2003"), Roles = new enmEnRoles[] {enmEnRoles.PRIVATE_USER}
                 },
                 new ClientUser()
                 {
-                    UserName = "user3", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user3@steelcloud.com", Dob = DateTime.Parse("04/04/2004")
+                    UserName = "user3", Password = @"password", EmailAddress = "user3@steelcloud.com", Dob = DateTime.Parse("04/04/2004")
                 },
                 new ClientUser()
                 {
-                    UserName = "user4", Password = @"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", EmailAddress = "user4@steelcloud.com", Dob = DateTime.Parse("05/05/2004")
+                    UserName = "user4", Password = @"password", EmailAddress = "user4@steelcloud.com", Dob = DateTime.Parse("05/05/2004")
                 }
             };
             return users;

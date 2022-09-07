@@ -26,7 +26,7 @@ namespace FunctionServer.Services
                 context.Status = new Status(StatusCode.Unauthenticated, $"Device Not Recognized. Incorrect Headers.");
             }
             
-            var json = File.ReadAllText(Path.Combine(Constants.CommonPath, Constants.DeviceFile));
+            var json = File.ReadAllText(Path.Combine(Path.GetTempPath(), Constants.DeviceFile));
             var machines = JsonSerializer.Deserialize<List<Machine>>(json);
             context.Status = new Status(StatusCode.Unauthenticated, $"Device Not Recognized");
             if (machines != null)
